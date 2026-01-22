@@ -1,10 +1,11 @@
-const BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 
 export const uploadFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await fetch(`${BASE_URL}/api/files/upload`, {
+  const res = await fetch(`${API_BASE_URL}/api/files/upload`, {
     method: 'POST',
     body: formData
   });
@@ -13,7 +14,7 @@ export const uploadFile = async (file) => {
 };
 
 export const askQuestion = async (question) => {
-  const res = await fetch(`${BASE_URL}/api/chat/ask`, {
+  const res = await fetch(`${API_BASE_URL}/api/chat/ask`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
