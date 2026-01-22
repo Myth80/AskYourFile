@@ -6,16 +6,22 @@ import chatRoutes from "./routes/chatRoutes.js";
 
 const app = express();
 
-/* 🔥 FIXED CORS CONFIG */
+/* 🔥 CORS */
 app.use(
   cors({
-    origin: [
-      "https://askyourfile-frontend.onrender.com",
-    ],
+    origin: "https://askyourfile-frontend.onrender.com",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+/* 🔥 REQUIRED FOR EXPRESS 5 */
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 app.use(express.json());
 
@@ -26,7 +32,7 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "AskYourFile backend running" });
 });
 
-/* 🔒 GLOBAL ERROR HANDLER (keep this) */
+/* 🔒 GLOBAL ERROR HANDLER */
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     return res.status(400).json({ error: err.message });
