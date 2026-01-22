@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const fileSchema = new mongoose.Schema(
+const FileSchema = new mongoose.Schema(
   {
     originalName: {
       type: String,
@@ -10,12 +10,17 @@ const fileSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    content: {
+    filePath: {
       type: String,
       required: true
+    },
+    status: {
+      type: String,
+      enum: ["uploaded", "processed"],
+      default: "uploaded"
     }
   },
   { timestamps: true }
 );
 
-export default mongoose.model('File', fileSchema);
+export default mongoose.model("File", FileSchema);
