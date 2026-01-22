@@ -11,7 +11,7 @@ echo "Upgrading pip..."
 pip install --upgrade pip
 
 echo "Installing Python dependencies..."
-pip install -r embedding_api/requirements.txt
+pip install -r embedding-api/requirements.txt
 
 echo "Installing backend dependencies..."
 npm install --prefix backend
