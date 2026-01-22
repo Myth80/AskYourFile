@@ -43,16 +43,16 @@ export const processFile = async (req, res) => {
       return res.status(404).json({ error: "File not found" });
     }
 
-    /* 🔍 Parse file */
-    const extractedText = await parseFile(file.filePath);
+    const extractedText = await parseFile({
+      path: file.filePath,
+      originalname: file.originalName,
+      mimetype: file.fileType
+    });
 
-    /* ✂️ Chunk text */
     const chunks = chunkText(extractedText);
 
-    /* 🧠 Generate embeddings */
     for (const chunk of chunks) {
       const embedding = await generateEmbedding(chunk);
-
       await Chunk.create({
         fileId: file._id,
         text: chunk,
@@ -63,13 +63,14 @@ export const processFile = async (req, res) => {
     file.status = "processed";
     await file.save();
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "File processed successfully",
       chunksCreated: chunks.length
     });
 
   } catch (err) {
     console.error("❌ Processing error:", err);
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
+
