@@ -18,7 +18,7 @@ app.use(
 );
 
 /* 🔥 HANDLE PREFLIGHT EXPLICITLY */
-app.options("*", cors());
+app.options("/*", cors());
 
 app.use(express.json());
 
