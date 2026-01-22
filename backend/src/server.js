@@ -1,6 +1,6 @@
-import 'dotenv/config'; // ⬅ loads .env first
-
+import 'dotenv/config';
 import { spawn } from 'child_process';
+import path from 'path';
 import app from './app.js';
 import connectDB from './config/db.js';
 
@@ -9,14 +9,26 @@ connectDB();
 const PORT = process.env.PORT || 5000;
 const PYTHON_PORT = 8000;
 
+/* Absolute paths (CRITICAL) */
+const PYTHON_PATH = path.join(process.cwd(), 'pyenv/bin/python');
+const PYTHON_APP = path.join(process.cwd(), 'embedding_api/app.py');
+
 /* Start Python FastAPI service */
-spawn('../pyenv/bin/python', ['embedding_api/app.py'], {
-  env: { ...process.env, PYTHON_PORT: 8000 },
+const python = spawn(PYTHON_PATH, [PYTHON_APP], {
+  env: { ...process.env, PYTHON_PORT },
   stdio: 'inherit'
 });
 
+/* 🔥 VERY IMPORTANT: surface Python crashes */
+python.on('error', (err) => {
+  console.error('❌ Failed to start Python:', err);
+});
+
+python.on('exit', (code) => {
+  console.error(`❌ Python process exited with code ${code}`);
+});
 
 /* Start Express server */
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
