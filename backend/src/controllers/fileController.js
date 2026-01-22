@@ -43,38 +43,45 @@ export const processFile = async (req, res) => {
       return res.status(404).json({ error: "File not found" });
     }
 
-    const extractedText = await parseFile({
-      path: file.filePath,
-      originalname: file.originalName,
-      mimetype: file.fileType
+    // ✅ RESPOND IMMEDIATELY (prevents frontend crash)
+    res.status(202).json({
+      message: "Processing started",
+      fileId
     });
 
-    const chunks = chunkText(extractedText);
+    // 🔥 BACKGROUND PROCESS (no await on response)
+    (async () => {
+      try {
+        const extractedText = await parseFile({
+          path: file.filePath,
+          originalname: file.originalName,
+          mimetype: file.fileType
+        });
 
-    for (const chunk of chunks) {
-      const embedding = await generateEmbedding(chunk);
-      await Chunk.create({
-        fileId: file._id,
-        text: chunk,
-        embedding
-      });
-    }
+        const chunks = chunkText(extractedText);
 
-    file.status = "processed";
-    await file.save();
+        for (const chunk of chunks) {
+          const embedding = await generateEmbedding(chunk);
+          await Chunk.create({
+            fileId: file._id,
+            text: chunk,
+            embedding
+          });
+        }
 
-    res.status(200).json({
-      message: "File processed successfully",
-      chunksCreated: chunks.length
-    });
+        file.status = "processed";
+        await file.save();
+
+      } catch (err) {
+        console.error("❌ Background processing error:", err.message);
+        file.status = "failed";
+        await file.save();
+      }
+    })();
 
   } catch (err) {
-  console.error("❌ Processing error:", err.message);
-
-  return res.status(503).json({
-    error: "Embedding service is warming up. Please retry in a moment."
-  });
-}
-
+    console.error("❌ Process init error:", err);
+    return res.status(500).json({ error: "Failed to start processing" });
+  }
 };
 
