@@ -9,11 +9,12 @@ connectDB();
 const PORT = process.env.PORT || 5000;
 const PYTHON_PORT = 8000;
 
-/* 🚀 Start Python FastAPI service */
-spawn('python', ['embedding_api/app.py'], {
-  env: { ...process.env, PYTHON_PORT },
+/* Start Python FastAPI service */
+spawn('../pyenv/bin/python', ['embedding_api/app.py'], {
+  env: { ...process.env, PYTHON_PORT: 8000 },
   stdio: 'inherit'
 });
+
 
 /* Start Express server */
 app.listen(PORT, () => {
