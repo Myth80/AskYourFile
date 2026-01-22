@@ -69,8 +69,12 @@ export const processFile = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Processing error:", err);
-    res.status(500).json({ error: err.message });
-  }
+  console.error("❌ Processing error:", err.message);
+
+  return res.status(503).json({
+    error: "Embedding service is warming up. Please retry in a moment."
+  });
+}
+
 };
 
