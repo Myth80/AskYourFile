@@ -9,17 +9,15 @@ connectDB();
 const PORT = process.env.PORT || 5000;
 const PYTHON_PORT = 8000;
 
-/* Absolute paths (CRITICAL) */
-const PYTHON_PATH = path.join(process.cwd(), 'pyenv/bin/python');
+/* Absolute path to Python app */
 const PYTHON_APP = path.join(process.cwd(), 'embedding_api/app.py');
 
-/* Start Python FastAPI service */
-const python = spawn(PYTHON_PATH, [PYTHON_APP], {
+/* 🔥 Use system Python */
+const python = spawn('python3', [PYTHON_APP], {
   env: { ...process.env, PYTHON_PORT },
   stdio: 'inherit'
 });
 
-/* 🔥 VERY IMPORTANT: surface Python crashes */
 python.on('error', (err) => {
   console.error('❌ Failed to start Python:', err);
 });
