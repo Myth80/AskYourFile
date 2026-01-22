@@ -10,8 +10,7 @@ const app = express();
 app.use(
   cors({
     origin: "https://askyourfile-frontend.onrender.com",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
   })
 );
 
