@@ -7,8 +7,10 @@ python3 -m venv pyenv
 echo "Activating virtual environment..."
 source pyenv/bin/activate
 
-echo "Installing Python dependencies..."
+echo "Upgrading pip..."
 pip install --upgrade pip
+
+echo "Installing Python dependencies..."
 pip install -r embedding_api/requirements.txt
 
 echo "Installing backend dependencies..."
