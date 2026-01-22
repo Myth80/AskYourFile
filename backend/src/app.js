@@ -17,9 +17,6 @@ app.use(
   })
 );
 
-/* 🔥 HANDLE PREFLIGHT EXPLICITLY */
-app.options("/*", cors());
-
 app.use(express.json());
 
 app.use("/api/files", fileRoutes);
