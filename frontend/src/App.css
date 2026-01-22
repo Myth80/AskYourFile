@@ -1,0 +1,276 @@
+/* Modern Design System Variables */
+:root {
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --radius: 16px;
+}
+
+/* Base Layout - Kept #root as requested */
+/* Update this in App.css */
+#root {
+  width: 100%;             /* Occupy full width up to the max-width */
+  max-width: 1280px;
+  margin: 0 auto;          /* Standard centering */
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* Centers components (ChatBox, etc.) inside root */
+  box-sizing: border-box;
+}
+
+/* Ensure the Home layout expands to the center */
+.home-layout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* Horizontal centering */
+  justify-content: center;
+}
+
+/* Body Reset (To be added via global context) */
+body {
+  margin: 0;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+}
+
+/* Logos - Enhanced with modern glow */
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em rgba(99, 102, 241, 0.4));
+  transform: scale(1.05);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em rgba(97, 218, 251, 0.5));
+}
+
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+/* Card - Modern Glassmorphism Style */
+.card {
+  padding: 2.5em;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease;
+  margin: 1rem 0;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+/* Typography Enhancements */
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5em;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: var(--primary);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}
+
+button:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Secondary text */
+.read-the-docs {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 2rem;
+  font-weight: 500;
+}
+/* Main Layout Container */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 80vh; /* Fixed height for the chat area */
+  width: 100%;
+  max-width: 800px;
+  background: var(--surface-color);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Scrollable Message List */
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  scroll-behavior: smooth;
+}
+
+/* Empty State Styling */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+/* Floating Input Group */
+.input-wrapper {
+  padding: 1.5rem;
+  background: linear-gradient(to top, var(--surface-color) 80%, transparent);
+}
+
+.input-group {
+  display: flex;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+  padding-left: 1.25rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.3s ease;
+}
+
+.input-group:focus-within {
+  border-color: var(--accent-color);
+}
+
+.chat-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 0.75rem 0;
+}
+
+.send-button {
+  padding: 0.75rem 1.5rem !important; /* Overriding base button padding */
+  border-radius: 12px !important;
+}
+
+/* Custom Scrollbar for a cleaner look */
+.message-list::-webkit-scrollbar {
+  width: 6px;
+}
+.message-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+/* Message Row - Handles Alignment */
+.message-row {
+  display: flex;
+  width: 100%;
+  margin-bottom: 1rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.user-row {
+  justify-content: flex-end;
+}
+
+.assistant-row {
+  justify-content: flex-start;
+}
+
+/* Common Bubble Styles */
+.message-bubble {
+  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.message-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+/* User Specific Styles (Indigo) */
+.user-bubble {
+  background-color: var(--accent-color);
+  color: white;
+  border-bottom-right-radius: 4px; /* Sharp corner effect */
+  text-align: left;
+}
+
+.user-bubble .message-header {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Assistant Specific Styles (Glassy/Gray) */
+.assistant-bubble {
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom-left-radius: 4px; /* Sharp corner effect */
+}
+
+/* Animation for new messages */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Light Mode Adjustments */
+@media (prefers-color-scheme: light) {
+  .assistant-bubble {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+}

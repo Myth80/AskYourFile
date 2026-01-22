@@ -1,0 +1,114 @@
+:root {
+  /* Modern Typography Stack */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+
+  /* Professional Color Palette (Dark Theme Default) */
+  --bg-color: #0f172a; /* Deep Slate Blue */
+  --surface-color: #1e293b;
+  --accent-color: #6366f1; /* Indigo */
+  --accent-hover: #818cf8;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  
+  color-scheme: light dark;
+  color: var(--text-primary);
+  background-color: var(--bg-color);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Sophisticated Link Styling */
+a {
+  font-weight: 600;
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+/* Modern Centered Layout */
+/* Update this in index.css */
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center; /* This pulls the content to the horizontal center */
+  align-items: flex-start;  /* Changed from 'center' to allow scrolling on long chats */
+  width: 100vw;            /* Force body to take full viewport width */
+  min-height: 100vh;
+  overflow-x: hidden;      /* Prevent horizontal scroll jank */
+}
+
+h1 {
+  font-size: 3.5rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+
+/* Tactile Button Design */
+button {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.8em 1.6em;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: var(--surface-color);
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+  border-color: var(--accent-color);
+  background-color: #2d3a4f;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Light Mode Refinement */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-color: #f1f5f9;
+    --surface-color: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --accent-color: #4f46e5;
+  }
+  
+  h1 {
+    background: linear-gradient(to right, #1e293b, #475569);
+    -webkit-background-clip: text;
+  }
+
+  button {
+    background-color: #ffffff;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+  }
+  
+  button:hover {
+    background-color: #f8fafc;
+  }
+
+}

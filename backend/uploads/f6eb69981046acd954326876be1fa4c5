@@ -1,0 +1,27 @@
+DBMS
+
+
+Create a database 
+-- CREATE DATABASE xyz;
+
+
+Use a database 
+-- USE XYZ;
+
+
+Alter database 
+-- ALTER DATABSE xyz;
+
+
+Delete a database
+-- DROP DATABASE xyz;
+
+
+Check table;
+-- SHOW TABLES;
+
+
+
+Create a table
+
+
