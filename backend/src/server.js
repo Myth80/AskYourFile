@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 const PYTHON_PORT = 8000;
 
 /* Absolute path to Python app */
-const PYTHON_APP = path.join(process.cwd(), 'embedding-api/app.py');
+const PYTHON_APP = path.join(process.cwd(), '..', 'embedding-api', 'app.py');
 
 /* 🔥 Use system Python */
 const python = spawn('python3', [PYTHON_APP], {
