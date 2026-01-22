@@ -33,12 +33,22 @@ export const processFile = async (fileId) => {
   );
 
   if (!res.ok) {
-    const err = await res.json();
+    // try to read error safely
+    const text = await res.text();
+    let err;
+    try {
+      err = text ? JSON.parse(text) : {};
+    } catch {
+      err = {};
+    }
     throw new Error(err.error || "Processing failed");
   }
 
-  return res.json();
+  // 🔥 DO NOT parse JSON
+  // backend already started processing
+  return;
 };
+
 
 /* =========================
    CHAT
