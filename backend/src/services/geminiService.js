@@ -11,7 +11,7 @@ export const embedText = async (text) => {
   });
 
   const result = await model.embedContent(text);
-  return result.embedding.values; // number[]
+  return result.embedding.values;
 };
 
 /* =========================
@@ -19,7 +19,7 @@ export const embedText = async (text) => {
    ========================= */
 export const askGemini = async (prompt) => {
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: "gemini-1.0-pro",
   });
 
   const result = await model.generateContent(prompt);
