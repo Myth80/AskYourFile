@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+console.log("🔑 Gemini key present:", !!process.env.GEMINI_API_KEY);
 
 /* =========================
    EMBEDDINGS
