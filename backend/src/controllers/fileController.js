@@ -1,11 +1,10 @@
 import File from "../models/File.js";
 import Chunk from "../models/Chunk.js";
 import { parseFile } from "../utils/fileParser.js";
-import { generateEmbedding } from "../services/embeddingService.js";
-import { chunkText } from "../services/ragService.js";
+import { embedText } from "../services/geminiService.js";
 
 /* ================================
-   1️⃣ UPLOAD FILE (FAST & SAFE)
+   1️⃣ UPLOAD FILE
    ================================ */
 export const uploadFile = async (req, res) => {
   try {
@@ -17,23 +16,22 @@ export const uploadFile = async (req, res) => {
       originalName: req.file.originalname,
       fileType: req.file.mimetype,
       filePath: req.file.path,
-      status: "uploaded"
+      status: "uploaded",
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "File uploaded successfully",
-      fileId: newFile._id
+      fileId: newFile._id,
     });
-
   } catch (err) {
     console.error("❌ Upload error:", err);
-    return res.status(500).json({ error: "Upload failed" });
+    res.status(500).json({ error: "Upload failed" });
   }
 };
 
-/* ==========================================
-   2️⃣ PROCESS FILE (HEAVY WORK – SEPARATE)
-   ========================================== */
+/* ================================
+   2️⃣ PROCESS FILE
+   ================================ */
 export const processFile = async (req, res) => {
   try {
     const { fileId } = req.params;
@@ -43,45 +41,36 @@ export const processFile = async (req, res) => {
       return res.status(404).json({ error: "File not found" });
     }
 
-    // ✅ RESPOND IMMEDIATELY (prevents frontend crash)
-    res.status(202).json({
-      message: "Processing started",
-      fileId
+    const extractedText = await parseFile({
+      path: file.filePath,
+      originalname: file.originalName,
+      mimetype: file.fileType,
     });
 
-    // 🔥 BACKGROUND PROCESS (no await on response)
-    (async () => {
-      try {
-        const extractedText = await parseFile({
-          path: file.filePath,
-          originalname: file.originalName,
-          mimetype: file.fileType
-        });
+    const chunks = extractedText
+      .split("\n")
+      .filter(Boolean)
+      .slice(0, 50); // safe limit for free tier
 
-        const chunks = chunkText(extractedText);
+    for (const chunk of chunks) {
+      const embedding = await embedText(chunk);
 
-        for (const chunk of chunks) {
-          const embedding = await generateEmbedding(chunk);
-          await Chunk.create({
-            fileId: file._id,
-            text: chunk,
-            embedding
-          });
-        }
+      await Chunk.create({
+        fileId: file._id,
+        text: chunk,
+        embedding,
+      });
+    }
 
-        file.status = "processed";
-        await file.save();
+    file.status = "processed";
+    await file.save();
 
-      } catch (err) {
-        console.error("❌ Background processing error:", err.message);
-        file.status = "failed";
-        await file.save();
-      }
-    })();
-
+    res.json({
+      message: "File processed successfully",
+      chunksCreated: chunks.length,
+    });
   } catch (err) {
-    console.error("❌ Process init error:", err);
-    return res.status(500).json({ error: "Failed to start processing" });
+    console.error("❌ Processing error:", err);
+    res.status(500).json({ error: "File processing failed" });
   }
 };
-

@@ -1,55 +1,44 @@
-import { generateEmbedding } from '../services/embeddingService.js';
-import { getRelevantChunks } from '../services/ragService.js';
-import { extractAnswer } from '../utils/extractAnswer.js';
+import Chunk from "../models/Chunk.js";
+import { embedText, askGemini } from "../services/geminiService.js";
 
 export const askQuestion = async (req, res) => {
   try {
     const { question } = req.body;
-
     if (!question) {
-      return res.status(400).json({ error: 'Question is required' });
+      return res.status(400).json({ error: "Question required" });
     }
 
-    // 1️⃣ Embed question (local)
-    const questionEmbedding = await generateEmbedding(question);
+    const queryEmbedding = await embedText(question);
 
-    // 2️⃣ Retrieve relevant chunks
-    const relevantChunks = await getRelevantChunks(
-      questionEmbedding,
-      3,
-      0.2
-    );
+    const results = await Chunk.aggregate([
+      {
+        $vectorSearch: {
+          index: "embedding_index",
+          queryVector: queryEmbedding,
+          path: "embedding",
+          numCandidates: 100,
+          limit: 5,
+        },
+      },
+    ]);
 
-    if (relevantChunks.length === 0) {
-      return res.json({
-        answer: 'I don’t know based on the uploaded documents.',
-        sources: []
-      });
-    }
+    const context = results.map(r => r.text).join("\n\n");
 
-    //  Build context
-    const context = relevantChunks.map(c => c.text).join('\n');
+    const prompt = `
+Use the context below to answer the question.
 
-    // 4️⃣ Deterministic extraction
-    const extracted = extractAnswer(context, question);
+Context:
+${context}
 
-    if (!extracted) {
-      return res.json({
-        answer: 'I don’t know based on the uploaded documents.',
-        sources: []
-      });
-    }
+Question:
+${question}
+`;
 
-    res.json({
-      answer: extracted,
-      sources: relevantChunks
-    });
+    const answer = await askGemini(prompt);
+
+    res.json({ answer });
   } catch (err) {
-  console.error('🔥 ERROR in /api/chat/ask:', err);
-  res.status(500).json({
-    error: 'Internal server error',
-    details: err.message
-  });
-}
-
+    console.error("🔥 Chat error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
