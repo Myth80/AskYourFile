@@ -42,4 +42,3 @@ ${question}
     res.status(500).json({ error: "Internal server error" });
   }
 };
-console.log("🔍 Vector results:", results.length);
