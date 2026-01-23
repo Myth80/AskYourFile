@@ -1,15 +1,17 @@
 import fs from "fs";
 import path from "path";
-import pdfjs from "pdfjs-dist/legacy/build/pdf.js";
+import * as pdfjs from "pdfjs-dist/build/pdf.mjs";
 
 export const parseFile = async (file) => {
   const filePath = file.path;
   const ext = path.extname(file.originalname).toLowerCase();
 
-  /* 📄 PDF (RENDER-SAFE, ESM-SAFE) */
+  /* 📄 PDF (ESM SAFE, RENDER SAFE) */
   if (file.mimetype === "application/pdf" || ext === ".pdf") {
     const data = new Uint8Array(fs.readFileSync(filePath));
-    const pdf = await pdfjs.getDocument({ data }).promise;
+
+    const loadingTask = pdfjs.getDocument({ data });
+    const pdf = await loadingTask.promise;
 
     let text = "";
 
