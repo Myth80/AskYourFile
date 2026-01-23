@@ -1,7 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-console.log("🔑 Gemini key present:", !!process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, {
+  apiVersion: "v1",
+});
 
 /* =========================
    EMBEDDINGS
@@ -20,7 +21,7 @@ export const embedText = async (text) => {
    ========================= */
 export const askGemini = async (prompt) => {
   const model = genAI.getGenerativeModel({
-    model: "gemini-pro",
+    model: "gemini-1.5-flash",
   });
 
   const result = await model.generateContent(prompt);
