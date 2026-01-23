@@ -3,7 +3,9 @@ import path from "path";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-const pdf = require("pdf-parse");
+const pdfParseModule = require("pdf-parse");
+const pdf = pdfParseModule.default || pdfParseModule;
+
 
 export const parseFile = async (file) => {
   const filePath = file.path;
