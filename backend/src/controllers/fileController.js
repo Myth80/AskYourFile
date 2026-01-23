@@ -48,9 +48,14 @@ export const processFile = async (req, res) => {
     });
 
     const chunks = extractedText
-      .split("\n")
-      .filter(Boolean)
-      .slice(0, 50); // safe limit for free tier
+  .split(/\n\s*\n/)          // split by empty lines (paragraphs)
+  .map(c => c.trim())
+  .filter(c => c.length > 50) // remove tiny fragments
+  .slice(0, 20);              // safe for Gemini free tier
+
+  // 🔥 delete old chunks for this file to avoid clashes
+    await Chunk.deleteMany({ fileId: file._id });
+
 
     for (const chunk of chunks) {
       const embedding = await embedText(chunk);
