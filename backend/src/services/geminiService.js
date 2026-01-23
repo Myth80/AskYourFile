@@ -19,7 +19,7 @@ export const embedText = async (text) => {
    ========================= */
 export const askGemini = async (prompt) => {
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.0-pro",
+    model: "gemini-pro",
   });
 
   const result = await model.generateContent(prompt);
