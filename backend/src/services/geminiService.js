@@ -1,8 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, {
-  apiVersion: "v1",
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /* =========================
    EMBEDDINGS
@@ -13,6 +11,7 @@ export const embedText = async (text) => {
   });
 
   const result = await model.embedContent(text);
+
   return result.embedding.values;
 };
 
@@ -21,9 +20,10 @@ export const embedText = async (text) => {
    ========================= */
 export const askGemini = async (prompt) => {
   const model = genAI.getGenerativeModel({
-    model: "gemini-flash-latest",
+    model: "gemini-1.5-flash",
   });
 
   const result = await model.generateContent(prompt);
+
   return result.response.text();
 };
