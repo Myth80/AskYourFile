@@ -20,7 +20,7 @@ export const embedText = async (text) => {
    ========================= */
 export const askGemini = async (prompt) => {
   const model = genAI.getGenerativeModel({
-        model: "gemini-3-flash-preview",
+        model: "gemini-2.0-flash",
 
   });
 
