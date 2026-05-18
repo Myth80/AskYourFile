@@ -5,11 +5,13 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
    EMBEDDINGS
    ========================= */
 export const embedText = async (text) => {
-  const model = genAI.getGenerativeModel(
-    { model: "text-embedding-latest" },
-    { apiVersion: "v1" } // ✅ fix 404 error
-  );
-  const result = await model.embedContent(text);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-embedding-2",
+  });
+  const result = await model.embedContent({
+    content: { parts: [{ text }], role: "user" },
+    outputDimensionality: 768,
+  });
   return result.embedding.values;
 };
 
@@ -18,7 +20,7 @@ export const embedText = async (text) => {
    ========================= */
 export const askGemini = async (prompt) => {
   const model = genAI.getGenerativeModel({
-    model: "gemini-flash-latest", // ✅ fix invalid model name
+    model: "gemini-2.0-flash",
   });
   const result = await model.generateContent(prompt);
   return result.response.text();
