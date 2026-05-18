@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
    ========================= */
 export const embedText = async (text) => {
   const model = genAI.getGenerativeModel(
-    { model: "text-embedding-004" },
+    { model: "text-embedding-latest" },
     { apiVersion: "v1" } // ✅ fix 404 error
   );
   const result = await model.embedContent(text);
