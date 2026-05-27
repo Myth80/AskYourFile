@@ -151,7 +151,7 @@ export default function FileUpload({ onStatusChange }) {
           style={{ display: 'none' }}
           onChange={onInput}
           accept=".pdf,.doc,.docx,.txt,.md"
-        />https://github.com/Myth80/AskYourFile/blob/main/frontend/src/components/FileUpload.jsx
+        />
 
         <div className="dz-icon" aria-hidden="true">
           <div className="dz-icon-ring dz-icon-ring--outer" />
