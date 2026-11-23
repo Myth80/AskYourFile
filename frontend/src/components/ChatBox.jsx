@@ -1,210 +1,138 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { askQuestion } from '../services/api';
 
-/* ── Animated typing dots ──────────────────────────────────────── */
-function ThinkingIndicator({ phase }) {
-  return (
-    <div className="thinking-row">
-      <div className="ai-avatar" aria-hidden="true">
-        <svg width="14" height="14" viewBox="0 0 28 28" fill="none">
-          <rect x="1" y="1" width="26" height="26" rx="7" stroke="currentColor" strokeWidth="1.5"/>
-          <path d="M7 14h4l2-5 3 10 2-5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-      <div className="thinking-bubble">
-        {phase === 'thinking' ? (
-          <>
-            <span className="think-label">Thinking</span>
-            <span className="think-dots">
-              <span className="dot" />
-              <span className="dot" />
-              <span className="dot" />
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="think-label">Generating</span>
-            <span className="gen-bar">
-              <span className="gen-fill" />
-            </span>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
+const suggestions = [
+  'Summarize the key points',
+  'What are the main conclusions?',
+  'List the action items',
+];
 
-/* ── Single message bubble ─────────────────────────────────────── */
-function Message({ msg, isNew }) {
-  const isUser = msg.role === 'user';
-  return (
-    <div className={`msg-row ${isUser ? 'msg-row--user' : 'msg-row--ai'} ${isNew ? 'msg-row--new' : ''}`}>
-      {!isUser && (
-        <div className="ai-avatar" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 28 28" fill="none">
-            <rect x="1" y="1" width="26" height="26" rx="7" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M7 14h4l2-5 3 10 2-5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      )}
-      <div className={`bubble ${isUser ? 'bubble--user' : 'bubble--ai'}`}>
-        {msg.content}
-        {msg.sources && msg.sources.length > 0 && (
-          <div className="source-chips">
-            {msg.sources.map((s, i) => (
-              <span key={i} className="source-chip">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <rect x="2" y="1" width="10" height="13" rx="2" stroke="currentColor" strokeWidth="1.3"/>
-                  <path d="M5 5h6M5 8h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                </svg>
-                {s}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ── Empty state ───────────────────────────────────────────────── */
-function EmptyState() {
-  const suggestions = [
-    'Summarize the key points',
-    'What are the main conclusions?',
-    'List all action items',
-    'Explain the methodology',
-  ];
+function EmptyState({ ready, onSuggest }) {
   return (
     <div className="empty-state">
-      <div className="empty-icon" aria-hidden="true">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="1" opacity="0.3"/>
-          <path d="M10 16c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          <circle cx="16" cy="16" r="2" fill="currentColor" opacity="0.5"/>
-        </svg>
-      </div>
-      <p className="empty-title">Upload a file to begin</p>
-      <p className="empty-sub">Then try asking…</p>
-      <div className="suggestion-chips">
-        {suggestions.map((s, i) => (
-          <button
-            key={i}
-            className="suggestion-chip"
-            style={{ '--chip-delay': `${i * 80}ms` }}
-            onClick={() => {
-              const input = document.getElementById('chat-input');
-              if (input) { input.value = s; input.focus(); }
-            }}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
+      <svg className="empty-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M7 6h18a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H14l-7 5v-5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M11 12h10M11 16h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+      <p className="empty-title">{ready ? 'What would you like to know?' : 'Upload a file to begin'}</p>
+      {ready ? (
+        <div className="suggestion-chips">
+          {suggestions.map(question => (
+            <button type="button" key={question} className="suggestion-chip" onClick={() => onSuggest(question)}>
+              {question}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="empty-sub">Your questions and answers will appear here.</p>
+      )}
     </div>
   );
 }
 
-/* ── Main ChatBox ──────────────────────────────────────────────── */
-export default function ChatBox({ onStatusChange }) {
+export default function ChatBox({ fileId, onStatusChange }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [aiPhase, setAiPhase] = useState(null); // null | 'thinking' | 'generating'
-  const [newMsgIdx, setNewMsgIdx] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
+  const requestRef = useRef(null);
+
+  useEffect(() => () => requestRef.current?.abort(), []);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, aiPhase]);
+    const log = scrollRef.current;
+    if (log) log.scrollTop = log.scrollHeight;
+  }, [messages, busy]);
 
   async function handleSend() {
-    const text = input.trim();
-    if (!text || aiPhase) return;
+    const question = input.trim();
+    if (!fileId || !question || requestRef.current) return;
 
-    const userMsg = { role: 'user', content: text };
-    setMessages(prev => [...prev, userMsg]);
-    setNewMsgIdx(messages.length);
+    const request = new AbortController();
+    requestRef.current = request;
+    setBusy(true);
+    setError('');
+    setMessages(previous => [...previous, { role: 'user', content: question }]);
     setInput('');
+    onStatusChange('thinking');
 
-    // Thinking phase
-    setAiPhase('thinking');
-    onStatusChange?.('thinking');
-    await new Promise(r => setTimeout(r, 1400 + Math.random() * 800));
-
-    // Generating phase
-    setAiPhase('generating');
-    onStatusChange?.('generating');
-    await new Promise(r => setTimeout(r, 1200 + Math.random() * 600));
-
-    // Mock AI response — replace with real RAG call
-    const aiMsg = {
-      role: 'assistant',
-      content: 'Based on the document, here is what I found: the content covers the key concepts you asked about. The relevant sections mention this topic in the context of the broader analysis.',
-      sources: ['Page 3', 'Page 7'],
-    };
-    setMessages(prev => [...prev, aiMsg]);
-    setNewMsgIdx(messages.length + 1);
-    setAiPhase(null);
-    onStatusChange?.('idle');
-
-    setTimeout(() => setNewMsgIdx(null), 800);
-  }
-
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+    try {
+      const { answer } = await askQuestion(question, fileId, request.signal);
+      if (request.signal.aborted) return;
+      if (typeof answer !== 'string' || !answer.trim()) {
+        throw new Error('No answer was returned. Please try again.');
+      }
+      setMessages(previous => [...previous, { role: 'assistant', content: answer }]);
+    } catch (err) {
+      if (request.signal.aborted) return;
+      setMessages(previous => previous.slice(0, -1));
+      setInput(question);
+      setError(err.message);
+    } finally {
+      if (!request.signal.aborted) {
+        requestRef.current = null;
+        setBusy(false);
+        onStatusChange('idle');
+      }
     }
   }
 
-  const isEmpty = messages.length === 0;
+  function selectSuggestion(question) {
+    setInput(question);
+    inputRef.current?.focus();
+  }
 
+  const canSend = fileId && input.trim() && !busy;
   return (
     <div className="chatbox">
-      {/* Messages area */}
-      <div className={`messages-area ${isEmpty ? 'messages-area--empty' : ''}`} ref={scrollRef}>
-        {isEmpty ? (
-          <EmptyState />
-        ) : (
-          <>
-            {messages.map((msg, i) => (
-              <Message key={i} msg={msg} isNew={newMsgIdx === i} />
-            ))}
-            {aiPhase && <ThinkingIndicator phase={aiPhase} />}
-          </>
-        )}
+      <div className={`messages-area ${messages.length ? '' : 'messages-area--empty'}`} ref={scrollRef} role="log" aria-label="Conversation">
+        {messages.length === 0 && <EmptyState ready={!!fileId} onSuggest={selectSuggestion} />}
+        {messages.map((message, i) => {
+          const speaker = message.role === 'user' ? 'user' : 'ai';
+          return (
+            <div className={`msg-row msg-row--${speaker}`} key={i}>
+              <div className={`bubble bubble--${speaker}`}>
+                <span className="speaker">{speaker === 'user' ? 'You' : 'AskYourFile'}</span>
+                {message.content}
+              </div>
+            </div>
+          );
+        })}
+        {busy && <p className="thinking-label">Reading your document…</p>}
       </div>
 
-      {/* Input bar */}
-      <div className={`input-bar ${aiPhase ? 'input-bar--busy' : ''}`}>
+      {error && <p className="chat-error" role="alert">{error}</p>}
+      <form className="input-bar" onSubmit={event => { event.preventDefault(); handleSend(); }}>
         <textarea
-          id="chat-input"
           ref={inputRef}
           className="chat-input"
+          aria-label="Question about your document"
           placeholder="Ask a question about your document…"
           value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKey}
-          rows={1}
-          disabled={!!aiPhase}
+          onChange={event => setInput(event.target.value)}
+          onKeyDown={event => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault();
+              handleSend();
+            }
+          }}
+          rows={2}
+          disabled={!fileId}
+          readOnly={busy}
         />
         <button
-          className={`send-btn ${(!input.trim() || aiPhase) ? 'send-btn--disabled' : 'send-btn--active'}`}
-          onClick={handleSend}
-          disabled={!input.trim() || !!aiPhase}
+          type="submit"
+          className={`send-btn ${canSend ? 'send-btn--active' : 'send-btn--disabled'}`}
+          disabled={!canSend}
           aria-label="Send message"
         >
-          {aiPhase ? (
-            <span className="send-spinner" />
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M2 8h12M9 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          )}
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="m3 9 14-6-5 14-2.5-5.5L3 9Zm6.5 2.5L17 3" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+          </svg>
         </button>
-      </div>
+      </form>
     </div>
   );
 }
