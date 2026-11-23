@@ -3,13 +3,12 @@ import { processFile, uploadFile } from '../services/api';
 
 function FileIcon({ file }) {
   const label = file.name.split('.').pop().toUpperCase();
-  const color = label === 'PDF' ? '#ff93ac' : '#9bbaff';
 
   return (
-    <span className="file-icon" style={{ '--file-color': color }} aria-hidden="true">
-      <svg width="32" height="40" viewBox="0 0 32 40" fill="none">
-        <path d="M4 1h17l8 8v28a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2Z" stroke="var(--file-color)" strokeWidth="1.5"/>
-        <path d="M21 1v8h8" stroke="var(--file-color)" strokeWidth="1.5"/>
+    <span className="file-icon" aria-hidden="true">
+      <svg width="32" height="40" viewBox="0 0 32 40" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M4 1h17l8 8v28a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2Z"/>
+        <path d="M21 1v8h8"/>
       </svg>
       <span className="file-ext-label">{label}</span>
     </span>
@@ -152,14 +151,20 @@ export default function FileUpload({ onFileChange, onStatusChange }) {
           type="button"
           className={`drop-zone ${dragOver ? 'drop-zone--over' : ''}`}
           onClick={browse}
-          aria-label="Upload a PDF or TXT file"
+          aria-label="Choose a file to upload (PDF or TXT)"
         >
-          <svg className="dz-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-            <path d="M14 20V10M9 15l5-5 5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M5 22h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.4"/>
+          <svg className="dz-icon" width="96" height="76" viewBox="0 0 96 76" fill="none" aria-hidden="true">
+            <g stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" transform="rotate(-5 48 40)">
+              <path d="M10 26h20l6 6h43v33H10z" fill="#fff"/>
+              <path d="M28 38V9h29l10 10v22z" fill="#fff"/>
+              <path d="M57 9v10h10M35 23h17m-17 6h24"/>
+              <path d="M9 37h29l5-4h44l-9 32H14z" fill="#d5ff39"/>
+              <path d="M53 44h22l-2 8H51z" fill="#fff"/>
+              <path d="M57 48h11" strokeWidth="1.2"/>
+            </g>
           </svg>
-          <span className="dz-main">{dragOver ? 'Drop to upload' : 'Drop your file here'}</span>
-          <span className="dz-sub">or browse for a PDF or TXT file</span>
+          <span className="dz-main">{dragOver ? 'Drop to upload' : 'Drop a file here'}</span>
+          <span className="dz-browse">Choose a file</span>
         </button>
       )}
       {error && <p className="upload-error" role="alert">{error}</p>}

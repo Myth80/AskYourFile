@@ -10,11 +10,16 @@ const suggestions = [
 function EmptyState({ ready, onSuggest }) {
   return (
     <div className="empty-state">
-      <svg className="empty-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-        <path d="M7 6h18a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H14l-7 5v-5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M11 12h10M11 16h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <svg className="empty-icon" width="90" height="70" viewBox="0 0 90 70" fill="none" aria-hidden="true">
+        <g stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+          <path d="M23 19h55v34H67v8l-12-8H23z" fill="#ffc79e" transform="rotate(8 50 39)"/>
+          <g transform="rotate(-6 38 30)">
+            <path d="M9 10h59v38H34l-13 9v-9H9z" fill="#fff"/>
+            <path d="M22 30c0-6 3-11 10-14l2 3c-4 2-6 5-7 8h8v12H22zm18 0c0-6 3-11 10-14l2 3c-4 2-6 5-7 8h8v12H40z" fill="currentColor" stroke="none"/>
+          </g>
+        </g>
       </svg>
-      <p className="empty-title">{ready ? 'What would you like to know?' : 'Upload a file to begin'}</p>
+      <p className="empty-title">{ready ? 'What would you like to know?' : 'Start with a document'}</p>
       {ready ? (
         <div className="suggestion-chips">
           {suggestions.map(question => (
@@ -24,7 +29,7 @@ function EmptyState({ ready, onSuggest }) {
           ))}
         </div>
       ) : (
-        <p className="empty-sub">Your questions and answers will appear here.</p>
+        <p className="empty-sub">Upload a file to ask your first question.</p>
       )}
     </div>
   );

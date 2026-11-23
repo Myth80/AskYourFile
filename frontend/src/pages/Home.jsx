@@ -1,47 +1,18 @@
+import { useState } from 'react';
 import FileUpload from '../components/FileUpload';
 import ChatBox from '../components/ChatBox';
-import { useState } from 'react';
 
-function AnimatedOrb() {
-  return (
-    <div className="orb-container">
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-      <div className="orb orb-3" />
-    </div>
-  );
-}
-
-function GridLines() {
-  return (
-    <div className="grid-lines" aria-hidden="true">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="grid-line" style={{ '--delay': `${i * 0.15}s` }} />
-      ))}
-    </div>
-  );
-}
-
-function StatusPill({ status }) {
-  const states = {
-    idle: { label: 'Awaiting file', dot: 'dot-idle' },
-    ready: { label: 'Document ready', dot: 'dot-ready' },
-    uploading: { label: 'Processing file…', dot: 'dot-active' },
-    thinking: { label: 'Thinking…', dot: 'dot-thinking' },
-  };
-  const { label, dot } = states[status] || states.idle;
-
-  return (
-    <div className="status-pill" role="status">
-      <span className={`status-dot ${dot}`} />
-      <span className="status-label">{label}</span>
-    </div>
-  );
-}
+const statusLabels = {
+  idle: 'Awaiting file',
+  ready: 'Document ready',
+  uploading: 'Processing file…',
+  thinking: 'Thinking…',
+};
 
 export default function Home() {
   const [aiStatus, setAiStatus] = useState('idle');
   const [fileId, setFileId] = useState(null);
+  const status = aiStatus === 'idle' && fileId ? 'ready' : aiStatus;
 
   function selectFile(id) {
     setFileId(id);
@@ -50,43 +21,32 @@ export default function Home() {
 
   return (
     <div className="home-root">
-      <GridLines />
-      <AnimatedOrb />
-
-      {/* Header */}
       <header className="home-header">
-        <div className="header-inner">
-          <div className="brand-lockup">
-            <div className="brand-icon">
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-                <rect x="1" y="1" width="26" height="26" rx="7" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M7 14h4l2-5 3 10 2-5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <h1 className="brand-title">AskYourFile</h1>
+        <h1 className="brand-title">AskYour<em>File</em></h1>
+        <div className="header-detail">
+          <p className="brand-subtitle">A conversation with your documents.</p>
+          <div className={`status-pill status-pill--${status}`} role="status">
+            <span className="status-dot" aria-hidden="true" />
+            {statusLabels[status]}
           </div>
-          <StatusPill status={aiStatus === 'idle' && fileId ? 'ready' : aiStatus} />
         </div>
-        <p className="brand-subtitle">
-          Drop a document. Ask anything. Get answers grounded in your content.
-        </p>
       </header>
 
-      {/* Main two-column layout */}
       <main className="home-content">
-        <div className="panel panel--upload">
-          <div className="panel-label">
-            <span>Upload Document</span>
-          </div>
+        <section className="panel panel--upload" aria-labelledby="document-heading">
+          <header className="panel-heading">
+            <h2 id="document-heading">Your document</h2>
+            <span className="format-label">PDF / TXT</span>
+          </header>
           <FileUpload onFileChange={selectFile} onStatusChange={setAiStatus} />
-        </div>
+        </section>
 
-        <div className="panel panel--chat">
-          <div className="panel-label">
-            <span>Ask Questions</span>
-          </div>
+        <section className="panel panel--chat" aria-labelledby="chat-heading">
+          <header className="panel-heading">
+            <h2 id="chat-heading">Conversation</h2>
+          </header>
           <ChatBox key={fileId ?? 'empty'} fileId={fileId} onStatusChange={setAiStatus} />
-        </div>
+        </section>
       </main>
     </div>
   );
