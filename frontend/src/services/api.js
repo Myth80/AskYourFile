@@ -1,72 +1,32 @@
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+const baseUrl = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/$/, '');
 
-
-/* =========================
-   FILE UPLOAD
-   ========================= */
-export const uploadFile = async (file) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const res = await fetch(`${API_BASE_URL}/api/files/upload`, {
-    method: "POST",
-    body: formData
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || "Upload failed");
+async function post(path, options, fallback) {
+  let response;
+  try {
+    response = await fetch(`${baseUrl}/api${path}`, { method: 'POST', ...options });
+  } catch (error) {
+    if (error.name === 'AbortError') throw error;
+    throw new Error('Could not reach AskYourFile. Check your connection and try again.');
   }
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data) throw new Error(data?.error || fallback);
+  return data;
+}
 
-  // returns { message, fileId }
-  return res.json();
-};
+export function uploadFile(file) {
+  const body = new FormData();
+  body.append('file', file);
+  return post('/files/upload', { body }, 'Upload failed. Please try again.');
+}
 
-/* =========================
-   FILE PROCESSING
-   ========================= */
-export const processFile = async (fileId) => {
-  const res = await fetch(
-    `${API_BASE_URL}/api/files/process/${fileId}`,
-    {
-      method: "POST"
-    }
-  );
+export function processFile(fileId) {
+  return post(`/files/process/${encodeURIComponent(fileId)}`, {}, 'Indexing failed. Please try again.');
+}
 
-  if (!res.ok) {
-    // try to read error safely
-    const text = await res.text();
-    let err;
-    try {
-      err = text ? JSON.parse(text) : {};
-    } catch {
-      err = {};
-    }
-    throw new Error(err.error || "Processing failed");
-  }
-
-  // 🔥 DO NOT parse JSON
-  // backend already started processing
-  return;
-};
-
-
-/* =========================
-   CHAT
-   ========================= */
-export const askQuestion = async (question) => {
-  const res = await fetch(`${API_BASE_URL}/api/chat/ask`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ question })
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || "Chat failed");
-  }
-
-  return res.json();
-};
+export function askQuestion(question, fileId, signal) {
+  return post('/chat/ask', {
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, fileId }),
+    signal,
+  }, 'Could not get an answer. Please try again.');
+}

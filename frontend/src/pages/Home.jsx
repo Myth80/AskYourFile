@@ -1,6 +1,6 @@
 import FileUpload from '../components/FileUpload';
 import ChatBox from '../components/ChatBox';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 function AnimatedOrb() {
   return (
@@ -24,15 +24,15 @@ function GridLines() {
 
 function StatusPill({ status }) {
   const states = {
-    idle: { label: 'Ready', dot: 'dot-idle' },
+    idle: { label: 'Awaiting file', dot: 'dot-idle' },
+    ready: { label: 'Document ready', dot: 'dot-ready' },
     uploading: { label: 'Processing file…', dot: 'dot-active' },
     thinking: { label: 'Thinking…', dot: 'dot-thinking' },
-    generating: { label: 'Generating response…', dot: 'dot-active' },
   };
   const { label, dot } = states[status] || states.idle;
 
   return (
-    <div className="status-pill">
+    <div className="status-pill" role="status">
       <span className={`status-dot ${dot}`} />
       <span className="status-label">{label}</span>
     </div>
@@ -41,14 +41,15 @@ function StatusPill({ status }) {
 
 export default function Home() {
   const [aiStatus, setAiStatus] = useState('idle');
-  const [mounted, setMounted] = useState(false);
+  const [fileId, setFileId] = useState(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  function selectFile(id) {
+    setFileId(id);
+    setAiStatus('idle');
+  }
 
   return (
-    <div className={`home-root ${mounted ? 'home-root--mounted' : ''}`}>
+    <div className="home-root">
       <GridLines />
       <AnimatedOrb />
 
@@ -64,7 +65,7 @@ export default function Home() {
             </div>
             <h1 className="brand-title">AskYourFile</h1>
           </div>
-          <StatusPill status={aiStatus} />
+          <StatusPill status={aiStatus === 'idle' && fileId ? 'ready' : aiStatus} />
         </div>
         <p className="brand-subtitle">
           Drop a document. Ask anything. Get answers grounded in your content.
@@ -75,18 +76,16 @@ export default function Home() {
       <main className="home-content">
         <div className="panel panel--upload">
           <div className="panel-label">
-            <span className="panel-num">01</span>
             <span>Upload Document</span>
           </div>
-          <FileUpload onStatusChange={setAiStatus} />
+          <FileUpload onFileChange={selectFile} onStatusChange={setAiStatus} />
         </div>
 
         <div className="panel panel--chat">
           <div className="panel-label">
-            <span className="panel-num">02</span>
             <span>Ask Questions</span>
           </div>
-          <ChatBox onStatusChange={setAiStatus} />
+          <ChatBox key={fileId ?? 'empty'} fileId={fileId} onStatusChange={setAiStatus} />
         </div>
       </main>
     </div>
